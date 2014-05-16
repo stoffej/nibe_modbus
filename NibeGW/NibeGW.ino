@@ -59,7 +59,7 @@
  *  Author: pauli.anttila@gmail.com
  *
  *
- *  2.11.2013   v1.00   Initial version.
+ *  2.11.2013	v1.00	Initial version.
  *  3.11.2013   v1.01   
  */
 
@@ -74,14 +74,15 @@
 #define ENABLE_DEBUG
 
 // the media access control (ethernet hardware) address for the shield
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+byte mac[] = { 0x90, 0xA2, 0xDA, 0x0F, 0x5D, 0xE1 };
+
 
 //the IP address for the shield
-byte ip[] = { 192, 168, 1, 50 };    
+byte ip[] = { 192, 168, 1, 201 };    
 
 // target IP address and port where UDP packats are send
-IPAddress target_ip(192, 168, 1, 28);
-unsigned int udp_port = 9999;
+IPAddress target_ip(192, 168, 1, 110);
+unsigned int udp_port = 9998;
 
 
 // ######### VARIABLES #######################
@@ -219,7 +220,8 @@ void loop() {
         debugPrint("CRC failure\n");
       }
       #endif
-      sendAck();//always send ack to prevent NIBE going into fail mode sendNak();
+      
+      sendAck();
       state = STATE_WAIT_START;
       break;
     
@@ -229,6 +231,7 @@ void loop() {
         debugPrint("Message received\n");
       }
       #endif
+      
       sendAck();
       
       // send UDP packet if message is a data packet
@@ -300,7 +303,7 @@ int checkNibeMessage(const byte* const data, byte len)
               
               // check special case, if checksum is 0x5C (start character), 
               // heat pump seems to send 0xC5 checksum
-              if (checksum != 0x5C && msg_checksum != 0xC5
+              if (checksum != 0x5C && msg_checksum != 0xC5)
                 return -2;
             }  
             
@@ -329,21 +332,6 @@ void sendAck()
   digitalWrite(directionPin, LOW);
 }
 
-void sendNak()
-{
-  #ifdef ENABLE_DEBUG
-  if (verbose) {
-    debugPrint("Send NAK\n");
-  }
-  #endif
-  
-  digitalWrite(directionPin, HIGH);
-  delay(1);
-  Serial.write(0x15);
-  Serial.flush();
-  delay(1);
-  digitalWrite(directionPin, LOW);
-}
 
 void sendUdpPacket(const byte* const data, int len) {
   
